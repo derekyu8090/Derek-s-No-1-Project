@@ -5,7 +5,7 @@ library(broom)
 library(dplyr)
 
 # File path for your dataset
-file_path <- "/Users/erwanghaoyu/Downloads/modified_filtered_final_auction_dataset.csv"
+file_path <- "/Users/erwanghaoyu/Downloads/filtered_final_auction_dataset.csv"
 
 # Read the data
 data <- read_csv(file_path)
@@ -14,9 +14,16 @@ data <- read_csv(file_path)
 data$Market <- as.factor(data$Market)
 data$Time <- as.factor(data$Time)
 data$Category <- as.factor(data$Category)
+data$Stratum <- as.factor(data$Stratum)
 
-# Implementing the DiD model with Category fixed effects
-did_model <- lm(Price ~ Market + Time + Market:Time + Category, data = data)
+# Create the interaction term manually
+data$Market_Time <- interaction(data$Market, data$Time, drop = TRUE)
+
+# Set the correct reference level for the interaction term
+data$Market_Time <- relevel(data$Market_Time, ref = "0.0")
+
+# Implementing the DiD model with Stratum fixed effects
+did_model <- lm(Price ~ Market_Time + Stratum, data = data)
 
 # Extracting model summary
 model_summary <- tidy(summary(did_model))
@@ -32,5 +39,5 @@ robust_se <- robust_se %>% mutate(Analysis = "Robust Standard Errors")
 combined_summary <- rbind(model_summary, robust_se)
 
 # Saving the combined results to a single file
-output_path <- "/Users/erwanghaoyu/Downloads/DID-EST/DID_CombinedSummary.csv"
+output_path <- "/Users/erwanghaoyu/Downloads/DID-EST/Fixedeffect_DID_CombinedSummary.csv"
 write.csv(combined_summary, file = output_path, row.names = FALSE)

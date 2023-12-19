@@ -18,11 +18,11 @@ data$T <- as.factor(data$T)
 new_breaks_size <- c(0, 14, 19, 30, 120)
 data$Size_c <- cut(data$Size, breaks = new_breaks_size, include.lowest = TRUE, labels = FALSE, right = FALSE)
 
-# Remove 'Jug' and 'Pot' categories from the dataset
-data <- subset(data, !Category %in% c("Jug", "Pot"))
+# Remove 'Jug' category from the dataset because of insuffient data
+data <- subset(data, !Category %in% c("Jug"))
 
 # List of remaining categories
-categories <- c("Bowl", "Dish", "Cup", "Vase", "Jar")
+categories <- c("Bowl", "Dish", "Cup", "Vase", "Jar", "Pot")
 
 # Initialize list to store matched data, SMD results, and matching summaries for each category
 matched_data <- list()
@@ -35,7 +35,7 @@ for (cat in categories) {
   cat_data <- subset(data, Category == cat)
   
   # Perform CEM
-  matching <- matchit(China ~ Size_c + Period + T, data = cat_data, method = "cem")
+  matching <- matchit(China ~ Size_c + Period, data = cat_data, method = "cem")
   
   if (!is.null(matching)) {
     matched_data[[cat]] <- match.data(matching)
